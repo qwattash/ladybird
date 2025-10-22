@@ -89,7 +89,7 @@ public:
     Optional<float> get_float_with_precision_loss() const { return get_number_with_precision_loss<float>(); }
     Optional<double> get_double_with_precision_loss() const { return get_number_with_precision_loss<double>(); }
 
-    Optional<FlatPtr> get_addr() const
+    Optional<ptraddr_t> get_addr() const
     {
         // Note: This makes the lambda dependent on the template parameter, which is necessary
         //       for the `if constexpr` to not evaluate both branches.
@@ -101,7 +101,7 @@ public:
             }
         };
 
-        return fn.operator()<FlatPtr>();
+        return fn.operator()<ptraddr_t>();
     }
 
     Optional<bool> get_bool() const

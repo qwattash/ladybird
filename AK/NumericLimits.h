@@ -71,6 +71,14 @@ struct NumericLimits<long long> {
 };
 
 template<>
+struct NumericLimits<intptr_t> {
+    static constexpr intptr_t min() { return 0; }
+    static constexpr intptr_t max() { return __INTPTR_MAX__; }
+    static constexpr bool is_signed() { return false; }
+    static constexpr size_t digits() { return __CHAR_BIT__ * sizeof(ptraddr_t); }
+};
+
+template<>
 struct NumericLimits<unsigned char> {
     static constexpr unsigned char min() { return 0; }
     static constexpr unsigned char max() { return __SCHAR_MAX__ * 2u + 1; }
@@ -108,6 +116,14 @@ struct NumericLimits<unsigned long long> {
     static constexpr unsigned long long max() { return __LONG_LONG_MAX__ * 2ull + 1; }
     static constexpr bool is_signed() { return false; }
     static constexpr size_t digits() { return __CHAR_BIT__ * sizeof(long long); }
+};
+
+template<>
+struct NumericLimits<uintptr_t> {
+    static constexpr uintptr_t min() { return 0; }
+    static constexpr uintptr_t max() { return __UINTPTR_MAX__; }
+    static constexpr bool is_signed() { return false; }
+    static constexpr size_t digits() { return __CHAR_BIT__ * sizeof(ptraddr_t); }
 };
 
 template<>

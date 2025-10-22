@@ -145,7 +145,17 @@ using pid_t = int;
 #    endif
 #endif
 
+#ifdef __CHERI__
+using FlatPtr = uintptr_t;
+#else
 using FlatPtr = AK::Detail::Conditional<sizeof(void*) == 8, u64, u32>;
+#endif
+
+#if __has_feature(capabilities)
+using ptraddr_t = __PTRADDR_TYPE__;
+#else
+using ptraddr_t = uintptr_t;
+#endif
 
 constexpr u64 KiB = 1024;
 constexpr u64 MiB = KiB * KiB;
@@ -166,11 +176,12 @@ using nullptr_t = AK_REPLACED_STD_NAMESPACE::nullptr_t;
 
 static constexpr FlatPtr explode_byte(u8 b)
 {
-    FlatPtr value = b;
+    ptraddr_t value = b;
     if constexpr (sizeof(FlatPtr) == 4)
         return value << 24 | value << 16 | value << 8 | value;
-    else if constexpr (sizeof(FlatPtr) == 8)
+    else if constexpr (sizeof(FlatPtr) == 8 || sizeof(FlatPtr) == 16)
         return value << 56 | value << 48 | value << 40 | value << 32 | value << 24 | value << 16 | value << 8 | value;
+    return value;
 }
 
 static_assert(explode_byte(0xff) == static_cast<FlatPtr>(0xffffffffffffffffull));
