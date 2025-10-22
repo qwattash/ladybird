@@ -292,6 +292,7 @@ template<>
 struct __MakeUnsigned<bool> {
     using Type = bool;
 };
+#ifdef __CHERI__
 template<>
 struct __MakeUnsigned<intptr_t> {
     using Type = uintptr_t;
@@ -300,6 +301,7 @@ template<>
 struct __MakeUnsigned<uintptr_t> {
     using Type = uintptr_t;
 };
+#endif
 
 template<typename T>
 using MakeUnsigned = typename __MakeUnsigned<T>::Type;
@@ -370,10 +372,12 @@ template<>
 inline constexpr bool __IsIntegral<unsigned long> = true;
 template<>
 inline constexpr bool __IsIntegral<unsigned long long> = true;
+#ifdef __CHERI__
 template<>
 inline constexpr bool __IsIntegral<uintptr_t> = true;
 template<>
 inline constexpr bool __IsIntegral<intptr_t> = true;
+#endif
 
 template<typename T>
 inline constexpr bool IsIntegral = __IsIntegral<MakeUnsigned<RemoveCV<T>>>;

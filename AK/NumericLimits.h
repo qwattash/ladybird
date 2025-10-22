@@ -70,6 +70,7 @@ struct NumericLimits<long long> {
     static constexpr size_t digits() { return __CHAR_BIT__ * sizeof(long long) - 1; }
 };
 
+#ifdef __CHERI__
 template<>
 struct NumericLimits<intptr_t> {
     static constexpr intptr_t min() { return 0; }
@@ -77,6 +78,7 @@ struct NumericLimits<intptr_t> {
     static constexpr bool is_signed() { return false; }
     static constexpr size_t digits() { return __CHAR_BIT__ * sizeof(ptraddr_t); }
 };
+#endif
 
 template<>
 struct NumericLimits<unsigned char> {
@@ -118,6 +120,7 @@ struct NumericLimits<unsigned long long> {
     static constexpr size_t digits() { return __CHAR_BIT__ * sizeof(long long); }
 };
 
+#ifdef __CHERI__
 template<>
 struct NumericLimits<uintptr_t> {
     static constexpr uintptr_t min() { return 0; }
@@ -125,6 +128,7 @@ struct NumericLimits<uintptr_t> {
     static constexpr bool is_signed() { return false; }
     static constexpr size_t digits() { return __CHAR_BIT__ * sizeof(ptraddr_t); }
 };
+#endif
 
 template<>
 struct NumericLimits<float> {
