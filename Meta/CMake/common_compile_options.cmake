@@ -66,6 +66,9 @@ elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "riscv64")
     # ISA or target string. Unfortunately hardware probing is also neither easy nor reliable at the moment.
     # For the time being use the defaults for the best compatibility with existing hardware and toolchains.
     # FIXME: Remove this branch once -march=native is supported.
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64c")
+    # On native aarch64c we need to specify explicitly the Morello arch.
+    add_cxx_compile_options(-march=morello)
 else()
     # In all other cases, compile for the native architecture of the host system.
     add_cxx_compile_options(-march=native)
@@ -168,7 +171,7 @@ if (UNIX AND NOT APPLE AND NOT ENABLE_FUZZERS)
     add_cxx_compile_options(-fvisibility-inlines-hidden)
 endif()
 
-if (NOT WIN32)
+if (NOT WIN32 AND ENABLE_STACK_PROTECTOR)
     add_cxx_compile_options(-fstack-protector-strong)
     add_cxx_link_options(-fstack-protector-strong)
 endif()

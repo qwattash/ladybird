@@ -24,6 +24,7 @@ ladybird_option(LAGOM_USE_LINKER "" CACHE STRING "The linker to use (e.g. lld, m
 ladybird_option(LAGOM_LINK_POOL_SIZE "" CACHE STRING "The maximum number of parallel jobs to use for linking")
 ladybird_option(ENABLE_LTO_FOR_RELEASE ${RELEASE_LTO_DEFAULT} CACHE BOOL "Enable link-time optimization for release builds")
 ladybird_option(ENABLE_LAGOM_COVERAGE_COLLECTION OFF CACHE STRING "Enable code coverage instrumentation for lagom binaries in clang")
+ladybird_option(ENABLE_STACK_PROTECTOR ON CACHE BOOL "Enable -fstack-protector, should be off for CHERI builds")
 
 if (ANDROID OR APPLE)
     ladybird_option(ENABLE_QT OFF CACHE BOOL "Build ladybird application using Qt GUI")
