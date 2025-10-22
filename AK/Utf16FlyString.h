@@ -171,7 +171,7 @@ public:
     template<SameAs<OptionalNone> V>
     constexpr Optional(V) { }
 
-    constexpr Optional(Optional<Utf16FlyString> const& other)
+    Optional(Optional<Utf16FlyString> const& other)
         : m_value(other.m_value)
     {
     }
