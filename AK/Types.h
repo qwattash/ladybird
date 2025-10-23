@@ -189,14 +189,24 @@ static_assert(explode_byte(0x80) == static_cast<FlatPtr>(0x8080808080808080ull))
 static_assert(explode_byte(0x7f) == static_cast<FlatPtr>(0x7f7f7f7f7f7f7f7full));
 static_assert(explode_byte(0) == 0);
 
-constexpr size_t align_up_to(size_t const value, size_t const alignment)
+template<typename T, typename V>
+constexpr T align_up_to(T const value, V const alignment)
 {
+#if __has_builtin(__builtin_align_up)
+    return __builtin_align_up(value, alignment);
+#else
     return (value + (alignment - 1)) & ~(alignment - 1);
+#endif
 }
 
-constexpr size_t align_down_to(size_t const value, size_t const alignment)
+template<typename T, typename V>
+constexpr T align_down_to(T const value, V const alignment)
 {
+#if __has_builtin(__builtin_align_down)
+    return __builtin_align_down(value, alignment);
+#else
     return value & ~(alignment - 1);
+#endif
 }
 
 enum class [[nodiscard]] TriState : u8 {
