@@ -145,7 +145,7 @@ using pid_t = int;
 #    endif
 #endif
 
-#ifdef __CHERI__
+#ifdef AK_ARCH_CHERI
 using FlatPtr = uintptr_t;
 #else
 using FlatPtr = AK::Detail::Conditional<sizeof(void*) == 8, u64, u32>;
