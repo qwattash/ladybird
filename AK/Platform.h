@@ -62,10 +62,19 @@
 #    define AK_IS_ARCH_WASM32() 0
 #endif
 
-#if (defined(__SIZEOF_POINTER__) && __SIZEOF_POINTER__ == 8) || defined(_WIN64)
-#    define AK_ARCH_64_BIT
+#ifdef __CHERI__
+#    define AK_ARCH_CHERI
+#    if __SIZEOF_POINTER__ == 16
+#        define AK_ARCH_64_BIT
+#    else
+#        define AK_ARCH_32_BIT
+#    endif
 #else
-#    define AK_ARCH_32_BIT
+#    if (defined(__SIZEOF_POINTER__) && __SIZEOF_POINTER__ == 8) || defined(_WIN64)
+#        define AK_ARCH_64_BIT
+#    else
+#        define AK_ARCH_32_BIT
+#    endif
 #endif
 
 #if defined(__clang__) || defined(__CLION_IDE__) || defined(__CLION_IDE_)
