@@ -49,7 +49,7 @@ public:
     allocate_again:;
         VERIFY(m_current_chunk != 0);
 
-        auto aligned_ptr = align_up_to(m_byte_offset_into_current_chunk + m_current_chunk, align);
+        auto aligned_ptr = align_up_to(m_current_chunk + m_byte_offset_into_current_chunk, align);
         auto next_offset = aligned_ptr + size - m_current_chunk;
         if (next_offset > m_chunk_size) {
             if (!allocate_a_chunk())
