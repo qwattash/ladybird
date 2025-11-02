@@ -209,6 +209,16 @@ constexpr T align_down_to(T const value, V const alignment)
 #endif
 }
 
+template<typename T>
+constexpr bool is_aligned_to(T const value, size_t alignment)
+{
+#if __has_builtin(__builtin_is_aligned)
+    return __builtin_is_aligned(value, alignment);
+#else
+    return (value & (alignment - 1)) == 0;
+#endif
+}
+
 enum class [[nodiscard]] TriState : u8 {
     False,
     True,
