@@ -33,6 +33,7 @@ static constexpr double MAX_ARRAY_LIKE_INDEX = 9007199254740991.0;
 // Unique bit representation of negative zero (only sign bit set)
 static constexpr u64 NEGATIVE_ZERO_BITS = ((u64)1 << 63);
 
+#if 0
 // This leaves us 3 bits to tag the type of pointer:
 static constexpr u64 OBJECT_TAG = 0b001 | GC::IS_CELL_BIT;
 static constexpr u64 STRING_TAG = 0b010 | GC::IS_CELL_BIT;
@@ -70,6 +71,53 @@ static_assert((EMPTY_TAG & IS_NULLISH_EXTRACT_PATTERN) != IS_NULLISH_PATTERN);
 
 static constexpr u64 SHIFTED_BOOLEAN_TAG = BOOLEAN_TAG << GC::TAG_SHIFT;
 static constexpr u64 SHIFTED_INT32_TAG = INT32_TAG << GC::TAG_SHIFT;
+#endif /* 0 */
+
+// This leaves us 3 bits to tag the type of pointer to be used with
+// NanBoxedValue::set_cell()
+static constexpr u8 OBJECT_TAG = 0b001;
+static constexpr u8 STRING_TAG = 0b010;
+static constexpr u8 SYMBOL_TAG = 0b011;
+static constexpr u8 ACCESSOR_TAG = 0b100;
+static constexpr u8 BIGINT_TAG = 0b101;
+
+#ifndef AK_ARCH_CHERI
+// We can then by extracting the top 13 bits quickly check if a Value is
+// pointer backed.
+static_assert((OBJECT_TAG & GC::Detail::IS_CELL_PATTERN) ==
+              GC::Detail::IS_CELL_PATTERN);
+static_assert((STRING_TAG & GC::Detail::IS_CELL_PATTERN) ==
+              GC::Detail::IS_CELL_PATTERN);
+static_assert((GC::Detail::CANON_NAN_BITS & GC::Detail::IS_CELL_PATTERN) !=
+              GC::Detail::IS_CELL_PATTERN);
+static_assert((GC::Detail::NEGATIVE_INFINITY_BITS & GC::Detail::IS_CELL_PATTERN) !=
+              GC::Detail::IS_CELL_PATTERN);
+#endif
+
+// Then for the non pointer backed types we don't set the sign bit and use the
+// three lower bits for tagging as well.
+// These are to be used with NanBoxedValue::set_data()
+static constexpr u8 UNDEFINED_TAG = 0b110;
+static constexpr u8 NULL_TAG = 0b111;
+static constexpr u8 BOOLEAN_TAG = 0b001;
+static constexpr u8 INT32_TAG = 0b010;
+static constexpr u8 EMPTY_TAG = 0b011;
+// Notice how only undefined and null have the top bit set, this mean we can
+// quickly check for nullish values by checking if the top and bottom bits are set
+// but the middle one isn't.
+static constexpr u64 IS_NULLISH_EXTRACT_PATTERN = 0xFFFEULL;
+static constexpr u64 IS_NULLISH_PATTERN = 0x7FFEULL;
+static_assert((UNDEFINED_TAG & IS_NULLISH_EXTRACT_PATTERN) == IS_NULLISH_PATTERN);
+static_assert((NULL_TAG & IS_NULLISH_EXTRACT_PATTERN) == IS_NULLISH_PATTERN);
+static_assert((BOOLEAN_TAG & IS_NULLISH_EXTRACT_PATTERN) != IS_NULLISH_PATTERN);
+static_assert((INT32_TAG & IS_NULLISH_EXTRACT_PATTERN) != IS_NULLISH_PATTERN);
+static_assert((EMPTY_TAG & IS_NULLISH_EXTRACT_PATTERN) != IS_NULLISH_PATTERN);
+// We also have the empty tag to represent array holes however since empty
+// values are not valid anywhere else we can use this "value" to our advantage
+// in Optional<Value> to represent the empty optional.
+
+static constexpr u64 SHIFTED_BOOLEAN_TAG = BOOLEAN_TAG << GC::TAG_SHIFT;
+static constexpr u64 SHIFTED_INT32_TAG = INT32_TAG << GC::TAG_SHIFT;
 
 // Summary:
 // To pack all the different value in to doubles we use the following schema:
@@ -85,6 +133,9 @@ static constexpr u64 SHIFTED_INT32_TAG = INT32_TAG << GC::TAG_SHIFT;
 // We can for example drop the always 1 top bit of the mantissa expanding our
 // options from 8 tags to 15 but since we currently only use 5 for both sign bits
 // this is not needed.
+
+// CHERI encodes this differently, because the minimum size is a pointer width,
+// which on 64bit architectures is larger than u64.
 
 class JS_API Value : public GC::NanBoxedValue {
 public:
@@ -152,6 +203,15 @@ public:
         if (is_int32())
             return true;
         return !is_nan() && !is_infinity();
+    }
+
+    bool is_nan() const
+    {
+#ifdef AK_ARCH_CHERI
+        return m_value.encoded == CANON_NAN_BITS;
+#else
+        return m_value.encoded == CANON_NAN_BITS;
+#endif
     }
 
     constexpr Value()
